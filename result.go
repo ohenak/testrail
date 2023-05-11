@@ -94,12 +94,7 @@ func (c *Client) GetResults(testID int, filters ...RequestFilterForCaseResults) 
 	if len(filters) > 0 {
 		uri = applyFiltersForCaseResults(uri, filters[0])
 	}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnResults, "results")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnResults)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnResults, "results")
 	return returnResults, err
 }
 
@@ -112,12 +107,7 @@ func (c *Client) GetResultsForCase(runID, caseID int, filters ...RequestFilterFo
 	if len(filters) > 0 {
 		uri = applyFiltersForCaseResults(uri, filters[0])
 	}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnResults, "results")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnResults)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnResults, "results")
 	return returnResults, err
 }
 
@@ -130,12 +120,7 @@ func (c *Client) GetResultsForRun(runID int, filters ...RequestFilterForRunResul
 	if len(filters) > 0 {
 		uri = applyFiltersForRunResults(uri, filters[0])
 	}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnResults, "results")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnResults)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnResults, "results")
 	return returnResults, err
 }
 

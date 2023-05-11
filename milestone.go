@@ -41,11 +41,7 @@ func (c *Client) GetMilestones(projectID int, isCompleted ...bool) ([]Milestone,
 	var err error
 	returnMilestones := []Milestone{}
 
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnMilestones, "milestones")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnMilestones)
-	}
+	err = c.sendRequest("GET", uri, nil, &returnMilestones, "milestones")
 
 	return returnMilestones, err
 }

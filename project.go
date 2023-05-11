@@ -41,12 +41,7 @@ func (c *Client) GetProjects(isCompleted ...bool) ([]Project, error) {
 	}
 
 	returnProjects := []Project{}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnProjects, "projects")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnProjects)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnProjects, "projects")
 	return returnProjects, err
 }
 

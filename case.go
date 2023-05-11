@@ -91,11 +91,7 @@ func (c *Client) GetCases(projectID, suiteID int, sectionID ...int) ([]Case, err
 
 	returnCases := []Case{}
 	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnCases, "cases")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnCases)
-	}
+	err = c.sendRequest("GET", uri, nil, &returnCases, "cases")
 	return returnCases, err
 }
 
@@ -109,11 +105,7 @@ func (c *Client) GetCasesWithCustomFields(projectID, suiteID int, customArray in
 	}
 
 	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &customArray, "cases")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &customArray)
-	}
+	err = c.sendRequest("GET", uri, nil, &customArray, "cases")
 	return err
 }
 

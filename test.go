@@ -34,11 +34,6 @@ func (c *Client) GetTests(runID int, statusID ...[]int) ([]Test, error) {
 	if len(statusID) > 0 {
 		uri = applySpecificFilter(uri, "status_id", statusID[0])
 	}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnTest, "tests")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnTest)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnTest, "tests")
 	return returnTest, err
 }

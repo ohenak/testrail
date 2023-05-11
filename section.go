@@ -45,12 +45,7 @@ func (c *Client) GetSections(projectID int, suiteID ...int) ([]Section, error) {
 	if len(suiteID) > 0 {
 		uri = uri + "&suite_id=" + strconv.Itoa(suiteID[0])
 	}
-	var err error
-	if c.useBetaApi {
-		err = c.sendRequestBeta("GET", uri, nil, &returnSection, "sections")
-	} else {
-		err = c.sendRequest("GET", uri, nil, &returnSection)
-	}
+	err := c.sendRequest("GET", uri, nil, &returnSection, "sections")
 	return returnSection, err
 }
 

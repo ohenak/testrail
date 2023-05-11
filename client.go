@@ -64,7 +64,7 @@ func NewCustomClient(url, username, password string, customHttpClient *http.Clie
 // sendRequest sends a request of type "method"
 // to the url "client.url+uri" and with optional data "data"
 // Returns an error if any and the optional data "v"
-func (c *Client) sendRequest(method, uri string, data, v interface{}) error {
+func (c *Client) sendRequest(method, uri string, data, v interface{}, itemsKeyName ...string) error {
 	var body io.Reader
 	if data != nil {
 		jsonReq, err := json.Marshal(data)
@@ -103,11 +103,43 @@ func (c *Client) sendRequest(method, uri string, data, v interface{}) error {
 		return fmt.Errorf("response: status: %q, body: %s", resp.Status, jsonCnt)
 	}
 
-	if v != nil {
-		err = json.Unmarshal(jsonCnt, v)
-		if err != nil {
-			return fmt.Errorf("unmarshaling response: %s", err)
+	if v == nil {
+		return nil
+	}
+
+	if itemsKeyName != nil {
+		if len(itemsKeyName) > 1 {
+			return fmt.Errorf("only support extract from 1 item key but got '%d'", len(itemsKeyName))
 		}
+		keyName := itemsKeyName[0]
+		var wraperMap map[string]json.RawMessage
+		var returnItems []interface{}
+		var tempItems []interface{}
+		var links Links
+
+		json.Unmarshal(jsonCnt, &wraperMap)
+		json.Unmarshal(wraperMap[keyName], &tempItems)
+		json.Unmarshal(wraperMap["_links"], &links)
+		returnItems = append(returnItems, tempItems...)
+
+		for err == nil && links.Next != nil {
+			nextUri := strings.TrimPrefix(*links.Next, "/api/v2/")
+			err = c.sendRequest("GET", nextUri, nil, &wraperMap)
+			if err == nil {
+				json.Unmarshal(wraperMap[keyName], &tempItems)
+				json.Unmarshal(wraperMap["_links"], &links)
+				returnItems = append(returnItems, tempItems...)
+			} else {
+				return err
+			}
+		}
+
+		jsonCnt, _ = json.Marshal(returnItems)
+	}
+
+	err = json.Unmarshal(jsonCnt, v)
+	if err != nil {
+		return fmt.Errorf("unmarshaling response: %s", err)
 	}
 
 	return nil
@@ -116,38 +148,4 @@ func (c *Client) sendRequest(method, uri string, data, v interface{}) error {
 type Links struct {
 	Next *string `json:"next"`
 	Prev *string `json:"prev"`
-}
-
-func (c *Client) sendRequestBeta(method, uri string, data, v interface{}, itemsKeyName string) error {
-	var wraperMap map[string]json.RawMessage
-	var returnItems []interface{}
-	var tempItems []interface{}
-	var links Links
-
-	err := c.sendRequest("GET", uri, nil, &wraperMap)
-	if err != nil {
-		return err
-	}
-
-	json.Unmarshal(wraperMap[itemsKeyName], &tempItems)
-	json.Unmarshal(wraperMap["_links"], &links)
-
-	returnItems = append(returnItems, tempItems...)
-
-	for err == nil && links.Next != nil {
-		nextUri := strings.TrimPrefix(*links.Next, "/api/v2/")
-		err = c.sendRequest("GET", nextUri, nil, &wraperMap)
-		if err == nil {
-			json.Unmarshal(wraperMap[itemsKeyName], &tempItems)
-			json.Unmarshal(wraperMap["_links"], &links)
-			returnItems = append(returnItems, tempItems...)
-		} else {
-			return err
-		}
-	}
-
-	jsonAll, _ := json.Marshal(returnItems)
-	json.Unmarshal(jsonAll, v)
-
-	return nil
 }
